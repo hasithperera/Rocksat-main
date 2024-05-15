@@ -104,35 +104,22 @@ int get_ch0(){
 // please add documentation for any changes that are done for this code and add your initials 
 
 // To-Do list of tasks
-//  - [ ]  Set RP io for PWM
+//  - [x]  Set RP io for PWM
 //  - [ ] get RP_Rx data
 //  - [ ] set RP_TX data
 //  - [ ] LP DAC
 //  - [ ] LP ADC
 
-
-// set the PWM pins using led blink
-// cmd needs to be figured out using the python script`:sq
-
-
-int init_io(){
-	// PWM pins as outputs 
-	rp_DpinSetDirection(RP_DIO1_N, RP_OUT);
-	rp_DpinSetDirection(RP_DIO2_N, RP_OUT);
-	rp_DpinSetDirection(RP_DIO3_N, RP_OUT);
-	
-	//limit sw testing
-	rp_DpinSetDirection(RP_DIO4_N, RP_IN);
-	rp_DpinSetDirection(RP_DIO5_N, RP_IN);
-	rp_DpinSetDirection(RP_DIO6_N, RP_IN);
-
-}
-
-
 int main(){
 
 	printf("RP-main for RocksaX");
 	init_io();
+	
+	//extend ant
+	ant_extend();
+	sleep(18);	
+	//ant stop cmd
+	ant_stop();
 
 
 	return 0;

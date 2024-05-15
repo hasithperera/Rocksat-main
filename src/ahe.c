@@ -24,3 +24,45 @@ int save_data(int i,float *buff,uint32_t buff_size,char *fname){
 
 	return 0;
 }
+
+// set the PWM pins using led blink
+// cmd needs to be figured out using the python script
+
+
+int init_io(){
+	// PWM pins as outputs 
+	rp_DpinSetDirection(RP_DIO1_N, RP_OUT);
+	rp_DpinSetDirection(RP_DIO2_N, RP_OUT);
+	rp_DpinSetDirection(RP_DIO3_N, RP_OUT);
+	
+	//limit sw - tested for operation 
+	rp_DpinSetDirection(RP_DIO4_N, RP_IN);
+	rp_DpinSetDirection(RP_DIO5_N, RP_IN);
+	rp_DpinSetDirection(RP_DIO6_N, RP_IN);
+
+	return 0;
+}
+
+
+int ant_extend(){
+	//led 8 bit control register specs 
+	// verify this python cmd = 2
+	rp_LEDSetState(0x00000002);
+	return 0;
+}
+
+int ant_stop(){
+	
+	rp_LEDSetState(0x00000000);
+	return 0;
+}
+
+int ant_retract(){
+	//engage retraction
+	//this will auto stop each servo when internal lim is triggered
+	
+	rp_LEDSetState(0x00000004);
+	return 0;
+}
+
+
