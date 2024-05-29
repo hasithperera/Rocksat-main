@@ -14,11 +14,6 @@
 #include "rp_hw.h"
 
 
-int ahe_SPI(){
-	
-	
-}
-
 int init_SPI(){
 	//Author: Greg Lusk
 	//notes: code tested for SPI clock speed 
@@ -58,23 +53,43 @@ int init_SPI(){
 }
 
 
+int DAC_set(uint16_t data){
+	// Author: AHE
+	// generate specified 24 bit packet
+	// bit0: 0
+	// bit1 and bit 2: 16 bit data
+	
+	char data_buffer[3]={0x00,(data&0xff00) >> 8,data&0x00ff};
+	
+    int res = rp_SPI_CreateMessage(1); // Create 2 message.
+ 	res = rp_SPI_SetBufferForMessage(0,(uint32_t*)data_buffer,true,3,false);
+	return rp_SPI_ReadWrite();
+	
+
+}
+
 int main(int argc, char *argv[]){
 
-    char *buffer = "GREG"; //gregs data
-    
-	
-	char rx_buf[255];
-    memset(rx_buf,0,255);
-	
 	int res = init_SPI(); // gregs code
 
-	// ahe test	
-	int data[3]={0x00,0x00,0xff};
-	write(res,data,3);
+/*	
+	uint16_t tmp = 0xf8f1;
+	char data[3]={0x00,(tmp&0xff00) >> 8,tmp&0x00ff};
+	
+    res = rp_SPI_CreateMessage(1); // Create 2 message.
+ 	res = rp_SPI_SetBufferForMessage(0,(uint32_t*)data,true,3,false);
+	res = rp_SPI_ReadWrite();
+	//res = rp_SPI_DestoryMessage();
+*/	
+	
+	
+	// New DAC syntax
+		
+	DAC_set(0x0ff0);
+	DAC_set(0xffff);
 
-	res = rp_SPI_DestoryMessage();
 
-    res = rp_SPI_Release(); // Close spi api.
+	res = rp_SPI_Release(); // Close spi api.
     printf("UnInit result: %d\n",res);
 
     return 0;
