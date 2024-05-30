@@ -106,15 +106,15 @@ int get_ch0(){
 // To-Do list of tasks
 //  - [x]  Set RP io for PWM
 //  - [ ] get RP_Rx data
-//  - [ ] set RP_TX data
+//  - [x] set RP_TX data
 //  - [ ] LP DAC
 //  - [ ] LP ADC
 
 int main(){
 
-	printf("RP-main for RocksaX");
+	printf("[i]\tRP-main for RocksaX\n");
 	init_io();
-	
+
 	//extend ant
 	ant_extend();
 	sleep(18);	

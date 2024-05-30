@@ -1,4 +1,4 @@
-MODEL ?=Z20 ## ahe - added for old
+MODEL ?=Z10 ## ahe - added for old
 CFLAGS  = -std=gnu11 -Wall ## -Werror
 CFLAGS += -I/opt/redpitaya/include -D$(MODEL)
 LDFLAGS = -L/opt/redpitaya/lib

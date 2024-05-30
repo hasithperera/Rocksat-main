@@ -8,6 +8,7 @@
 #include "rp_hw-profiles.h"
 #include "rp.h"
 
+#define debug_print 1
 
 void test_func(){
 	printf("external file");
@@ -30,6 +31,13 @@ int save_data(int i,float *buff,uint32_t buff_size,char *fname){
 
 
 int init_io(){
+
+    // Initialization of API
+    if (rp_Init() != RP_OK) {
+        fprintf(stderr, "Red Pitaya API init failed!\n");
+        return EXIT_FAILURE;
+    }		
+
 	// PWM pins as outputs 
 	rp_DpinSetDirection(RP_DIO1_N, RP_OUT);
 	rp_DpinSetDirection(RP_DIO2_N, RP_OUT);
@@ -48,11 +56,19 @@ int ant_extend(){
 	//led 8 bit control register specs 
 	// verify this python cmd = 2
 	rp_LEDSetState(0x00000002);
+	
+#ifdef debug_print
+	printf("[i]\t ant extend\n");
+#endif
 	return 0;
 }
 
 int ant_stop(){
-	
+
+#ifdef debug_print
+	printf("[i]\t ant stop\n");
+#endif
+
 	rp_LEDSetState(0x00000000);
 	return 0;
 }

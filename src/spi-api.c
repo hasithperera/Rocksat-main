@@ -61,8 +61,8 @@ int DAC_set(uint16_t data){
 	
 	char data_buffer[3]={0x00,(data&0xff00) >> 8,data&0x00ff};
 	
-    int res = rp_SPI_CreateMessage(1); // Create 2 message.
- 	res = rp_SPI_SetBufferForMessage(0,(uint32_t*)data_buffer,true,3,false);
+    int res = rp_SPI_CreateMessage(3); // Create 2 message.
+ 	res = rp_SPI_SetBufferForMessage(0,(uint32_t*)data_buffer,0,3,0);
 	return rp_SPI_ReadWrite();
 	
 
@@ -84,10 +84,10 @@ int main(int argc, char *argv[]){
 	
 	
 	// New DAC syntax
-		
+	
+
 	DAC_set(0x0ff0);
 	DAC_set(0xffff);
-
 
 	res = rp_SPI_Release(); // Close spi api.
     printf("UnInit result: %d\n",res);
