@@ -1,0 +1,1 @@
+/opt/redpitaya/lib/python/rp_test.py
