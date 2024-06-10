@@ -1,4 +1,6 @@
+#executable files
 src/test
+src/main
 
 *.o
 

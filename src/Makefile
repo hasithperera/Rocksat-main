@@ -46,7 +46,8 @@ PRGS += i2c_switch_max7311
 OBJS := $(patsubst %,%.o,$(PRGS))
 SRC := $(patsubst %,%.c,$(PRGS))
 
-all: $(PRGS)
+
+all: $(PRGS) 
 
 $(PRGS): %: %.c
 	$(CC) $< $(CFLAGS) $(LDFLAGS) $(LDLIBS) -o $@
