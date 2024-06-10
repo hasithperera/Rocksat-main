@@ -1,3 +1,6 @@
 src/test
 
 *.o
+
+# status logs from redpitaya
+./logs/*
