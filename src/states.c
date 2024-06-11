@@ -13,7 +13,7 @@
 #include <math.h>
 #include <string.h>
 
-
+#define debug 1
 void IterDeployTime(int *pntr, char *StartUpFileName,int total_delay) {
 
 	for(int i=*(pntr+1); i<=total_delay; i++){
@@ -49,6 +49,8 @@ int read_state(int *pntr,char *file){
 		fgets(tmp_data,10,fptr);
 		tmp_value =  atoi(tmp_data);
 		*(pntr+i) = tmp_value;
+
+		//printf("[d]\t\t%d\n",tmp_value);
 	}
 
 	fclose(fptr);	
@@ -97,7 +99,7 @@ void startup_count(int *pntr, char *StartUpFileName){
 	// If the StartUp file exists
 	if(fptr != NULL) {
 
-		printf("[i]\t\t %s file open ",StartUpFileName);
+		printf("[i] %s file open \n",StartUpFileName);
 		// Read the content and print into allocated space
   		fgets(DeployTimeStr, 10, fptr);
 		fgets(ResetCountStr, 10, fptr);
@@ -115,7 +117,7 @@ void startup_count(int *pntr, char *StartUpFileName){
 	// If the file does not exist
 	} else {
 
-		printf("[!]\t\t%s file not found!",StartUpFileName);
+		printf("[!] %s file not found!",StartUpFileName);
   		// Open a file in append mode
 		fptr = fopen(StartUpFileName, "w");
 

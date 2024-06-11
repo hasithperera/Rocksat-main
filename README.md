@@ -18,5 +18,8 @@ The final code will run the WVU RocksatX experiment.
 - [x] PWM control
 
 
+## Testing
 
+- `./scripts/test_1.sh` runs a test sequence to ensure the PWM and experiment restart functionality is operational
+- `./scripts/pre_launch.sh` clears the state history to make it ready for launch
 
