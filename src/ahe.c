@@ -82,7 +82,7 @@ int ant_stop(){
 	uint32_t led_state;
 
 	rp_LEDGetState(&led_state);
-	rp_LEDSetState(led_state&(1|1<<3|1<<4));
+	rp_LEDSetState(led_state&~(1|1<<3|1<<4));
 	
 	return 0;
 }
