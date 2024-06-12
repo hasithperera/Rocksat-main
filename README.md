@@ -19,14 +19,13 @@ The file name created during the experiment will have the following syntax `xxxx
 - `y`indicates the experiment id.
 - `zzzzz` specifies the time block
 
-The files will contain a total of $(2 + \bufferlength) \times 4$ bytes of binary data. the first 16 bytes contain a time stamp followed by data expored by the user.
+The files will contain a total of $(2 + bufferlength) \times 4$ bytes of binary data. the first 16 bytes contain a time stamp followed by data expored by the user.
 You can use the following python code block to access the raw data
 
-```
+``` python
 file_i = 'data/00018_1_{:05}.bin'.format(0)
 time_stamp = np.fromfile(file_i, dtype=np.intc, count=2, offset = 0)
 data = np.fromfile(file_i, dtype=np.float32, count=-1, offset = 8)
-	
 ```
 ## To-Do list
 
