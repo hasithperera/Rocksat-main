@@ -4,27 +4,51 @@
 #include <unistd.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
+
 
 #include "rp_hw-profiles.h"
 #include "rp.h"
 #include "rp_hw.h"
 
-#define debug_print 1
+#define debug_print 2
 
 void test_func(){
 	printf("external file");
 }
-	
-	
-int save_data(int i,float *buff,uint32_t buff_size){
-	char fname[30];	
-	FILE *write_ptr;
-	sprintf(fname,"out/test-%03d.bin",i);
-	write_ptr = fopen(fname,"wb");  // w for write, b for binary
-	fwrite(buff,sizeof(float),buff_size,write_ptr); // write 10 bytes from our buffer
-	fclose(write_ptr);
 
+
+
+	
+	
+int save_data(int restart_id,int time_id,int exp_id,char *file_loc,float *buff,uint32_t buff_size){
+	// save a time stamp followed by data
+	// to read file created here use time=np.intc and data=np.float32
+
+	char fname[100];	
+	FILE *write_ptr;
+	sprintf(fname,"%s/%05d_%d_%05d.bin",file_loc,restart_id,exp_id,time_id);
+	write_ptr = fopen(fname,"wb");  // w for write, b for binary
+	
+	struct timespec ts;
+	clock_gettime(CLOCK_REALTIME,&ts);
+	long time_stamp[2];
+	
+	
+	time_stamp[0]=ts.tv_sec;
+	time_stamp[1]=ts.tv_nsec;
+
+	#ifdef debug_print
+		printf("time:%ld.%ld\n",time_stamp[0],time_stamp[1]);
+	#endif
+
+	fwrite(time_stamp,sizeof(long),2,write_ptr); //time stamp
+	fwrite(buff,sizeof(float),buff_size,write_ptr); //write data
+	fclose(write_ptr);
 	return 0;
+
+
+
 }
 
 // set the PWM pins using led blink
@@ -38,7 +62,8 @@ int init_io(){
         fprintf(stderr, "Red Pitaya API init failed!\n");
         return EXIT_FAILURE;
     }		
-
+	rp_Reset();	
+	
 	// PWM pins as outputs 
 	rp_DpinSetDirection(RP_DIO1_N, RP_OUT);
 	rp_DpinSetDirection(RP_DIO2_N, RP_OUT);
@@ -69,29 +94,46 @@ int ant_extend(){
 	rp_LEDSetState(1<<1|1<<0|1<<3|1<<4); 
 	
 #ifdef debug_print
-	printf("[i]\t ant extend\n");
+	printf("[i] ant extend\n");
 #endif
 	return 0;
 }
+
 
 int ant_stop(){
 
 #ifdef debug_print
-	printf("[i]\t ant stop\n");
+	printf("[i] ant stop\n");
 #endif
 	uint32_t led_state;
 
 	rp_LEDGetState(&led_state);
-	rp_LEDSetState(led_state&(1|1<<3|1<<4));
+	rp_LEDSetState(led_state&~(1|1<<3|1<<4));
 	
 	return 0;
 }
 
+int rand_TX(){
+	//>v52
+	return rp_LEDSetState(1<<5); 
+}
+
+
+int rand_off(){
+	//>v52
+	uint32_t led_state;
+
+	rp_LEDGetState(&led_state);
+	return rp_LEDSetState(led_state&~(1<<5)); 
+}
+
+
 int ant_retract(){
 	//engage retraction
 	//this will auto stop each servo when internal lim is triggered
-	
-	rp_LEDSetState(0x00000004);
+	// Need to update to v63
+
+	//rp_LEDSetState(0x00000004);
 	return 0;
 }
 
@@ -101,35 +143,13 @@ int init_SPI(){
 	//notes: code tested for SPI clock speed 
 	
     int res = rp_SPI_InitDevice("/dev/spidev1.0"); // Init spi api.
-    printf("Init result: %d\n",res);
-
     res = rp_SPI_SetDefaultSettings(); // Set default settings.
-    printf("Set default settings: %d\n",res);
-
     res = rp_SPI_GetSettings(); // Get uart speed.
-    printf("Get current settings of spi: %d\n",res);
-
     res = rp_SPI_SetMode(RP_SPI_MODE_LIST); // Set SPI mode: Low idle level, sample on trailing edge.
-    printf("Set mode: %d\n",res);
-
     res = rp_SPI_SetSpeed(1000000); // Set SPI speed.
-    printf("Set speed: %d\n",res);
-
-    //res = rp_SPI_GetSpeed(1);
-    //printf("Get speed: %d\n",res);
-
     res = rp_SPI_SetWordLen(8); // Set word bit size.
-    printf("Set word length: %d\n",res);
-
     res = rp_SPI_SetSettings(); // Apply settings to SPI.
-    printf("Set settings: %d\n",res);
-
     res = rp_SPI_CreateMessage(1); // Create 2 message.
-    printf("Set settings: %d\n",res);
-
-/*    res = rp_SPI_SetBufferForMessage(0,(uint32_t*)buffer,true,3,false); // Set buffer for first message and create RX buffer.
-    printf("Set buffers for first msg: %d\n",res);
-*/
 
 	return res;
 }
@@ -149,4 +169,109 @@ int DAC_set(uint16_t data){
 	
 
 }
+
+void log_event(char *text,char *event_log){
+
+	struct timespec ts;
+	clock_gettime(CLOCK_REALTIME,&ts);
+	#ifdef debug
+		printf("%ld.%ld\t%s",ts.tv_sec,ts.tv_nsec,text);
+	#endif
+
+	FILE *fp=fopen(event_log,"a+");
+	fprintf(fp,"%ld.%ld\t%s",ts.tv_sec,ts.tv_nsec,text);
+	fclose(fp);
+}
+
+// Experiment functions:
+
+int RF1_init(){
+// for Sounding mode
+	
+	rp_AcqReset();
+    rp_AcqSetDecimation(RP_DEC_1);
+	
+
+	rp_AcqSetGain(RP_CH_2, RP_LOW);// user can switch gain using this command
+    rp_AcqSetGain(RP_CH_1, RP_LOW);// user can switch gain using this command
+ 	
+	rp_AcqSetTriggerDelay(ADC_BUFFER_SIZE/2.0);
+	
+	//rp_AcqSetAveraging(1);				
+	return 0;   
+}
+
+int RF2_init(){
+// for LP experiments
+
+	rp_AcqReset();
+    rp_AcqSetDecimation(RP_DEC_2048);
+
+	rp_AcqSetAveraging(1);				
+	rp_AcqSetTriggerDelay(ADC_BUFFER_SIZE/2.0);
+	return 0;   
+}
+
+uint32_t get_sounding_with_TX(float *buff){
+// get the full memory bank 2^16 
+
+	uint32_t buff_size = ADC_BUFFER_SIZE;
+	printf("[d] Acq start:\n");
+	
+	rand_TX();
+	rp_AcqStart();
+	rp_AcqSetTriggerSrc(RP_TRIG_SRC_NOW);
+	usleep(150);	
+	bool fillState = false;
+	while(!fillState){
+	      rp_AcqGetBufferFillState(&fillState);
+	}
+	
+	rp_AcqStop();
+	rand_off();
+    rp_AcqGetOldestDataV(RP_CH_1, &buff_size, buff);
+    
+    return buff_size;
+}
+
+int lp_sweep(){
+	
+	rp_AcqStart();
+	
+
+	uint16_t outputCode = 0x8000;
+	rp_AcqSetTriggerSrc(RP_TRIG_SRC_NOW);
+	
+    DAC_set(outputCode);
+	usleep(2000);
+
+	for(int i=0;i<800;i++){
+    	DAC_set(outputCode+=20);	
+		usleep(1);
+	}
+	
+    DAC_set(0x8000); // set 0V
+    usleep(1);
+	usleep(5000);
+	DAC_set(0x8000); // set 0V
+	
+
+	outputCode = 0x8000;
+	for(int i=0;i<800;i++){
+    	DAC_set(outputCode-=20);	
+		usleep(1);
+	}
+
+    DAC_set(0x8000); // set 0V
+	
+	bool fillState = false;
+	while(!fillState){
+	      rp_AcqGetBufferFillState(&fillState);
+	}
+	
+	rp_AcqStop();
+	return 0;
+}
+
+
 

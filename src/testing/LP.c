@@ -66,7 +66,7 @@ int DAC_set(uint16_t data){
 	char data_buffer[3]={0x00,(data&0xff00) >> 8,data&0x00ff};
 	
     int res = rp_SPI_CreateMessage(3); // Create 2 message.
- 	res = rp_SPI_SetBufferForMessage(0,(uint32_t*)data_buffer,0,3,0);
+ 	res = rp_SPI_SetBufferForMessage(0,data_buffer,0,3,0);
 	return rp_SPI_ReadWrite();
 	
 
@@ -75,28 +75,13 @@ int DAC_set(uint16_t data){
 int main(int argc, char *argv[]){
 
 	int res = init_SPI(); // gregs code
-
-    for(int i = 0; i < 1; i++)
-    {
-        for(outputCode = 0; outputCode < (uint32_t)65535; outputCode+=512)
-        {
-	        //printf("%2d\t%2X %2X\n", outputCode);
-            printf("%2d,", outputCode);
-            DAC_set(outputCode);
-            get_ch0();
-        }
-
-        for(outputCode = 65280; !exit; outputCode-=255)
-        {
-	        //printf("%2d\t%2X %2X\n", outputCode);
-            printf("%2d,", outputCode);
-            DAC_set(outputCode);
-            get_ch0();
-	        if(outputCode == 0) 
-		        break;
-        }
-	//DAC_set(65535);
+    for(outputCode = 0x8000; outputCode < 0xffff; outputCode+=1<<6){
+		printf("%d\n", outputCode);
+        DAC_set(outputCode);
+		usleep(100);
     }
+
+    DAC_set(0x8000);
 	res = rp_SPI_Release(); // Close spi api.
 
     return 0;
