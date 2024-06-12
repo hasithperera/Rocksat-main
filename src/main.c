@@ -30,6 +30,19 @@ char *startup_log = "/opt/data/logs/StartUpData.log";
 char *event_log = "/opt/data/logs/run.log";
 char *data_location = "/opt/data/out/";
 
+void log_event(char *text){
+
+	struct timespec ts;
+	clock_gettime(CLOCK_REALTIME,&ts);
+	#ifdef debug
+		printf("%ld.%ld\t%s",ts.tv_sec,ts.tv_nsec,text);
+	#endif
+
+	FILE *fp=fopen(event_log,"a+");
+	fprintf(fp,"%ld.%ld\t%s",ts.tv_sec,ts.tv_nsec,text);
+	fclose(fp);
+}
+
 int main(){
 	
 	#ifdef debug
@@ -66,7 +79,8 @@ int main(){
 
 	log_event("[i] Deployment done.\n",event_log);
 	
-	// Main exp and data saving
+	
+	// Main data saving
 
 	read_state(data,startup_log);
 	
@@ -74,7 +88,7 @@ int main(){
 		printf("[d] file exp:%d\n",data[2]);
 	#endif
 
-	for(int exp_time=data[2];exp_time<10;exp_time++){
+	for(int exp_time=data[2];exp_time<230;exp_time++){
 		
 		#ifdef debug
 			printf("[i] exp_itr:%d\n",exp_time);
