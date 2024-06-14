@@ -3,16 +3,18 @@
 #include <string.h>
 
 
-#include "ahe.c"
-#include "states.c"
+//#include "ahe.c"
 
 int data[3];
 char *startup_log = "/opt/data/logs/StartUpData.log";
 char *event_log = "/opt/data/logs/run.log";
 
+#include "states.c"
+
+
 int main(){
 
-	log_event("[i] Clean startup log.",event_log);
+	log_event("[i] Clean startup log.(pre launch)\n",event_log);
 	read_state(data,startup_log);
 	// clear Deploy time and exp time
 	data[0] = 0;

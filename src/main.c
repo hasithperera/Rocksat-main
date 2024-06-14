@@ -17,8 +17,6 @@
 
 #include <time.h>
 
-#include "ahe.c"
-#include "states.c"
 
 #define EPS 0.05
 #define EPS_F 100
@@ -30,18 +28,10 @@ char *startup_log = "/opt/data/logs/StartUpData.log";
 char *event_log = "/opt/data/logs/run.log";
 char *data_location = "/opt/data/out/";
 
-void log_event(char *text){
 
-	struct timespec ts;
-	clock_gettime(CLOCK_REALTIME,&ts);
-	#ifdef debug
-		printf("%ld.%ld\t%s",ts.tv_sec,ts.tv_nsec,text);
-	#endif
+//#include "ahe.c"
+#include "states.c"
 
-	FILE *fp=fopen(event_log,"a+");
-	fprintf(fp,"%ld.%ld\t%s",ts.tv_sec,ts.tv_nsec,text);
-	fclose(fp);
-}
 
 int main(){
 	
@@ -49,6 +39,8 @@ int main(){
 		struct timespec start, end;
     	long long elapsed_ns;
 	#endif	
+
+	log_event("[i] RocksatX-WVU Power up.\n",event_log);
 
 	uint32_t buff_size = 16384; 
 	float *buff = (float *)malloc(buff_size * sizeof(float));
@@ -74,13 +66,12 @@ int main(){
 	
 	// Antenna extension
 	ant_extend();
-	IterDeployTime(data,startup_log,36);	
+	log_event("[i] ANT start\n",event_log);
+	IterDeployTime(data,startup_log,29);	
 	ant_stop();
-
-	log_event("[i] Deployment done.\n",event_log);
+	log_event("[i] ANT stop\n",event_log);
 	
-	
-	// Main data saving
+	// Main exp and data saving
 
 	read_state(data,startup_log);
 	
@@ -115,6 +106,7 @@ int main(){
 
 		// LP sweep : exp 3
 		RF1_init();
+		usleep(150000);
 	
 		// exp counter
 		data[2]++;

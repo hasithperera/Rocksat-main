@@ -21,7 +21,11 @@ if __name__=='__main__':
     rp.rp_DpinSetDirection(rp.RP_DIO2_N,rp.RP_OUT)
     rp.rp_DpinSetDirection(rp.RP_DIO1_N,rp.RP_OUT)
     
-    rp.rp_LEDSetState(255)
+    rp.rp_DpinSetDirection(rp.RP_DIO4_N,rp.RP_OUT)
+    rp.rp_DpinSetDirection(rp.RP_DIO5_N,rp.RP_OUT)
+    rp.rp_DpinSetDirection(rp.RP_DIO6_N,rp.RP_OUT)
+    rp.rp_DpinSetDirection(rp.RP_DIO7_N,rp.RP_OUT)
+    rp.rp_LEDSetState(0)
 
     while(1):
         usr = input('>')

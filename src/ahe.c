@@ -11,8 +11,8 @@
 #include "rp.h"
 #include "rp_hw.h"
 
-#define debug_print 2
-
+#define debug_print 1
+#define debug 1
 void test_func(){
 	printf("external file");
 }
@@ -131,9 +131,9 @@ int rand_off(){
 int ant_retract(){
 	//engage retraction
 	//this will auto stop each servo when internal lim is triggered
-	// Need to update to v63
+	//v63 - compatible
 
-	//rp_LEDSetState(0x00000004);
+	rp_LEDSetState(1<<0|1<<1|1<<2|1<<3|1<<4);
 	return 0;
 }
 
@@ -163,7 +163,7 @@ int DAC_set(uint16_t data){
 	
 	char data_buffer[3]={0x00,(data&0xff00) >> 8,data&0x00ff};
 	
-    rp_SPI_CreateMessage(3); // Create 2 message.
+    	rp_SPI_CreateMessage(3); // Create 2 message.
  	rp_SPI_SetBufferForMessage(0,(uint8_t*)data_buffer,0,3,0);
 	return rp_SPI_ReadWrite();
 	
@@ -189,11 +189,11 @@ int RF1_init(){
 // for Sounding mode
 	
 	rp_AcqReset();
-    rp_AcqSetDecimation(RP_DEC_1);
+    	rp_AcqSetDecimation(RP_DEC_1);
 	
 
 	rp_AcqSetGain(RP_CH_2, RP_LOW);// user can switch gain using this command
-    rp_AcqSetGain(RP_CH_1, RP_LOW);// user can switch gain using this command
+    	rp_AcqSetGain(RP_CH_1, RP_LOW);// user can switch gain using this command
  	
 	rp_AcqSetTriggerDelay(ADC_BUFFER_SIZE/2.0);
 	
@@ -205,7 +205,7 @@ int RF2_init(){
 // for LP experiments
 
 	rp_AcqReset();
-    rp_AcqSetDecimation(RP_DEC_2048);
+    	rp_AcqSetDecimation(RP_DEC_2048);
 
 	rp_AcqSetAveraging(1);				
 	rp_AcqSetTriggerDelay(ADC_BUFFER_SIZE/2.0);
@@ -229,7 +229,7 @@ uint32_t get_sounding_with_TX(float *buff){
 	
 	rp_AcqStop();
 	rand_off();
-    rp_AcqGetOldestDataV(RP_CH_1, &buff_size, buff);
+    	rp_AcqGetOldestDataV(RP_CH_1, &buff_size, buff);
     
     return buff_size;
 }
@@ -242,27 +242,27 @@ int lp_sweep(){
 	uint16_t outputCode = 0x8000;
 	rp_AcqSetTriggerSrc(RP_TRIG_SRC_NOW);
 	
-    DAC_set(outputCode);
+    	DAC_set(outputCode);
 	usleep(2000);
 
 	for(int i=0;i<800;i++){
-    	DAC_set(outputCode+=20);	
+    		DAC_set(outputCode+=40);	
 		usleep(1);
 	}
 	
-    DAC_set(0x8000); // set 0V
-    usleep(1);
+    	DAC_set(0x8000); // set 0V
+    	usleep(1);
 	usleep(5000);
 	DAC_set(0x8000); // set 0V
 	
 
 	outputCode = 0x8000;
 	for(int i=0;i<800;i++){
-    	DAC_set(outputCode-=20);	
+    		DAC_set(outputCode-=40);	
 		usleep(1);
 	}
 
-    DAC_set(0x8000); // set 0V
+   	 DAC_set(0x8000); // set 0V
 	
 	bool fillState = false;
 	while(!fillState){

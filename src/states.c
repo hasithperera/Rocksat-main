@@ -13,9 +13,12 @@
 #include <math.h>
 #include <string.h>
 
+#include "ahe.c"
 #define debug 1
-void IterDeployTime(int *pntr, char *StartUpFileName,int total_delay) {
 
+//#define debug 1
+void IterDeployTime(int *pntr, char *StartUpFileName,int total_delay) {
+	char str[40];
 	for(int i=*(pntr+1); i<=total_delay; i++){
 		FILE *fptr;
 		*(pntr+1) = *(pntr+1) + 1;
@@ -24,7 +27,11 @@ void IterDeployTime(int *pntr, char *StartUpFileName,int total_delay) {
 		fprintf(fptr, "%d\n", *pntr);
 		fprintf(fptr, "%d\n", *(pntr+2)); // ahe-exp time
 		fclose(fptr);
-		printf("[i]\t\t PWM time:%d\n", i);
+
+		#ifdef debug
+			sprintf(str,"[i] PWM time:%d\n",i);
+			log_event(str,event_log);
+		#endif
 		usleep(500000);
 	}
 }
