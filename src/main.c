@@ -39,8 +39,13 @@ int main(){
 		struct timespec start, end;
     	long long elapsed_ns;
 	#endif	
-
+	char str_tmp[30];
+	read_state(data,startup_log);
 	log_event("[i] RocksatX-WVU Power up.\n",event_log);
+
+
+	sprintf(str_tmp,"[d] file info %d,%d,%d\n",data[0],data[1],data[2]);
+	log_event(str_tmp,event_log);
 
 	uint32_t buff_size = 16384; 
 	float *buff = (float *)malloc(buff_size * sizeof(float));
