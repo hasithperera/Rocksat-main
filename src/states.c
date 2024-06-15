@@ -16,6 +16,8 @@
 #include "ahe.c"
 #define debug 1
 
+//char *event_log = "/opt/data/logs/run.log";
+
 //#define debug 1
 void IterDeployTime(int *pntr, char *StartUpFileName,int total_delay) {
 	char str[40];
@@ -23,9 +25,10 @@ void IterDeployTime(int *pntr, char *StartUpFileName,int total_delay) {
 		FILE *fptr;
 		*(pntr+1) = *(pntr+1) + 1;
 		fptr = fopen(StartUpFileName, "w");
-		fprintf(fptr, "%d %s", *(pntr+1), "\n");
+		fprintf(fptr, "%d\n", *(pntr+1));
 		fprintf(fptr, "%d\n", *pntr);
 		fprintf(fptr, "%d\n", *(pntr+2)); // ahe-exp time
+		fprintf(fptr, "%s\n", "We have last written from the IterDeployTime function within the main code.!.!.!");
 		fclose(fptr);
 
 		#ifdef debug
@@ -120,6 +123,7 @@ void startup_count(int *pntr, char *StartUpFileName){
 		fptr = fopen(StartUpFileName, "w");
 		fprintf(fptr, "%s", DeployTimeStr);
 		fprintf(fptr, "%d\n%d\n", ResetCount,experiment_time);
+		fprintf(fptr, "%s\n", "We have last written from the startup_count function within the main code!!!");
 
 	// If the file does not exist
 	} else {

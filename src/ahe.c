@@ -11,7 +11,7 @@
 #include "rp.h"
 #include "rp_hw.h"
 
-#define debug_print 1
+//#define debug_print 1
 #define debug 1
 void test_func(){
 	printf("external file");
@@ -71,6 +71,7 @@ int init_io(){
 
 	//TE IN
 	rp_DpinSetDirection(RP_DIO3_P, RP_IN);
+	rp_DpinSetDirection(RP_DIO4_P, RP_OUT);
 
 	//limit sw - tested for operation 
 	rp_DpinSetDirection(RP_DIO4_N, RP_IN);
@@ -80,6 +81,18 @@ int init_io(){
 	return 0;
 }
 
+
+void sounding_ant_flip(){
+	//change the antenna
+	rp_DpinSetState(RP_DIO4_P,RP_HIGH);
+
+}
+
+void sounding_ant_org(){
+	//change the antenna
+	rp_DpinSetState(RP_DIO4_P,RP_LOW);
+
+}
 
 int ant_extend(){
 	//led 8 bit control register specs 
@@ -189,11 +202,11 @@ int RF1_init(){
 // for Sounding mode
 	
 	rp_AcqReset();
-    	rp_AcqSetDecimation(RP_DEC_1);
+    rp_AcqSetDecimation(RP_DEC_1);
 	
 
 	rp_AcqSetGain(RP_CH_2, RP_LOW);// user can switch gain using this command
-    	rp_AcqSetGain(RP_CH_1, RP_LOW);// user can switch gain using this command
+    rp_AcqSetGain(RP_CH_1, RP_LOW);// user can switch gain using this command
  	
 	rp_AcqSetTriggerDelay(ADC_BUFFER_SIZE/2.0);
 	
@@ -212,26 +225,39 @@ int RF2_init(){
 	return 0;   
 }
 
-uint32_t get_sounding_with_TX(float *buff){
-// get the full memory bank 2^16 
+void get_sounding(){
+// get the full memory bank 2^14 
 
-	uint32_t buff_size = ADC_BUFFER_SIZE;
-	printf("[d] Acq start:\n");
 	
-	rand_TX();
 	rp_AcqStart();
 	rp_AcqSetTriggerSrc(RP_TRIG_SRC_NOW);
-	usleep(150);	
+	usleep(4);	
 	bool fillState = false;
 	while(!fillState){
 	      rp_AcqGetBufferFillState(&fillState);
 	}
 	
 	rp_AcqStop();
+}
+
+
+void sounding_sweep(int exp_id,float *buff,uint32_t buff_size,char *file,int *data){
+	int count = 1;
+	for(int i=0;i<5;i++){
+		get_sounding();
+		rp_AcqGetOldestDataV(RP_CH_1, &buff_size, buff);
+		save_data(data[1],data[2]+(count++)*1000,exp_id,file,buff,buff_size); // sounding data
+		printf("file:%d\n",data[2]+(count)*1000);
+	}
+	rand_TX();
+	for(int i=0;i<5;i++){
+		get_sounding();
+		rp_AcqGetOldestDataV(RP_CH_1, &buff_size, buff);
+		save_data(data[1],data[2]+(count++)*1000,exp_id,file,buff,buff_size); // sounding data
+		printf("file:%d\n",data[2]+(count)*1000);
+	}
+
 	rand_off();
-    	rp_AcqGetOldestDataV(RP_CH_1, &buff_size, buff);
-    
-    return buff_size;
 }
 
 int lp_sweep(){
@@ -239,26 +265,26 @@ int lp_sweep(){
 	rp_AcqStart();
 	
 
-	uint16_t outputCode = 0x8000;
+	uint16_t outputCode = 29500;
 	rp_AcqSetTriggerSrc(RP_TRIG_SRC_NOW);
 	
-    	DAC_set(outputCode);
+    DAC_set(outputCode);
 	usleep(2000);
 
-	for(int i=0;i<800;i++){
-    		DAC_set(outputCode+=40);	
+	for(int i=0;i<1334;i++){
+    	DAC_set(outputCode+=27);	
 		usleep(1);
 	}
 	
-    	DAC_set(0x8000); // set 0V
-    	usleep(1);
+    	DAC_set(29500); // set -1V
+    //	usleep(1);
 	usleep(5000);
-	DAC_set(0x8000); // set 0V
+	DAC_set(29500); // set -1V
 	
 
-	outputCode = 0x8000;
-	for(int i=0;i<800;i++){
-    		DAC_set(outputCode-=40);	
+	outputCode = 29500;
+	for(int i=0;i<250;i++){
+    		DAC_set(outputCode-=118);	
 		usleep(1);
 	}
 

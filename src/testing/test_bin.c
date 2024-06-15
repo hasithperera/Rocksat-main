@@ -6,66 +6,21 @@
 #include <string.h>
 #include <time.h>
 
-#include "ahe.c"
-#include "states.c"
 #include "rp.h"
+//#include "ahe.c"
 
 #define EPS 0.05
 #define EPS_F 100
 
-int RF1_init(){
-// for Sounding mode
-	
-	rp_AcqReset();
-    rp_AcqSetDecimation(RP_DEC_1);
-	
 
-	rp_AcqSetGain(RP_CH_2, RP_LOW);// user can switch gain using this command
-    rp_AcqSetGain(RP_CH_1, RP_LOW);// user can switch gain using this command
- 	
-	rp_AcqSetTriggerDelay(ADC_BUFFER_SIZE/2.0);
-	
-	//rp_AcqSetAveraging(1);				
-	return 0;   
-}
+// needs to be before state.c include
+char *event_log = "/opt/data/logs/run.log";
 
-int RF2_init(){
-// for LP experiments
+#include "states.c"
 
-	rp_AcqReset();
-    rp_AcqSetDecimation(RP_DEC_2048);
 
-	rp_AcqSetAveraging(1);				
-	rp_AcqSetTriggerDelay(ADC_BUFFER_SIZE/2.0);
-	return 0;   
-}
-
-uint32_t get_sounding_with_TX(float *buff){
-// get the full memory bank 2^16 
-
-	uint32_t buff_size = ADC_BUFFER_SIZE;
-    float average;
-	
-	printf("[d] Acq start:\n");
-	
-	rand_TX();
-	rp_AcqStart();
-	rp_AcqSetTriggerSrc(RP_TRIG_SRC_NOW);
-	usleep(150);	
-	bool fillState = false;
-	while(!fillState){
-	      rp_AcqGetBufferFillState(&fillState);
-	}
-	
-	rp_AcqStop();
-	rand_off();
-    rp_AcqGetOldestDataV(RP_CH_1, &buff_size, buff);
-    
-    return buff_size;
-}
-
-int lp_sweep(){
-	
+int lp_sweep_HS(){
+	struct timespec req, rem;	
 	rp_AcqStart();
 	
 
@@ -74,14 +29,18 @@ int lp_sweep(){
 	
     DAC_set(outputCode);
 	usleep(2000);
+	req.tv_sec = 0;
+	req.tv_nsec = 200;
 
 	for(int i=0;i<800;i++){
-    	DAC_set(outputCode+=20);	
-		usleep(1);
+    	DAC_set(0x8000);	
+		nanosleep(&req, &rem);
+    	DAC_set(0xffff);	
+		//nanosleep(&req, &rem);
 	}
 	
     DAC_set(0x8000); // set 0V
-    usleep(1);
+   /* usleep(1);
 	usleep(5000);
 	DAC_set(0x8000); // set 0V
 	
@@ -93,7 +52,8 @@ int lp_sweep(){
 	}
 
     DAC_set(0x8000); // set 0V
-	
+	*/
+
 	bool fillState = false;
 	while(!fillState){
 	      rp_AcqGetBufferFillState(&fillState);
@@ -121,7 +81,7 @@ int main(){
 	init_SPI();
 	DAC_set(0x8000); // set 0V at startup
 	
-	read_state(data,startup_log);
+	read_state(data,startup_log); // load exp id from file
 	
 		
 	float freq;
@@ -132,18 +92,28 @@ int main(){
 	//RF1_init();
 	RF2_init();
 	printf("ok\n");
+	data[1]=100;
 
 	clock_gettime(CLOCK_REALTIME,&start);
 
-
+	RF1_init();
+	sounding_sweep(3,buff,buff_size,file,data);	
+	sounding_ant_flip();
+	sounding_sweep(4,buff,buff_size,file,data);	
+	sounding_ant_org();
+	sounding_sweep(3,buff,buff_size,file,data);	
+	sounding_ant_flip();
+	sounding_sweep(4,buff,buff_size,file,data);	
+	sounding_ant_org();
+	
 
 	//event needs timing
-	//get_sounding(buff);
-	lp_sweep();
-    rp_AcqGetOldestDataV(RP_CH_2, &buff_size, buff);
-	save_data(1,data[2]++,2,file,buff,buff_size); // LP
+	//lp_sweep();
+	//DAC_set(0xFFFF-1); // set 0V at startup
+    //rp_AcqGetOldestDataV(RP_CH_2, &buff_size, buff);
+	//save_data(1,data[2]++,2,file,buff,buff_size); // LP
 
-//	save_data(1,data[2]++,1,file,buff,buff_size); // sounding data
+
 	
 	clock_gettime(CLOCK_REALTIME,&end);
 	

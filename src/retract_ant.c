@@ -33,7 +33,7 @@ int main(){
 	log_event("[i] Start ant retraction\n",event_log);
 	init_io();
 	ant_retract();
-	usleep(15000000);	
+	usleep(15700000);	
 	ant_stop();
 
 	log_event("[i] ant retraction done\n",event_log);

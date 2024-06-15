@@ -100,8 +100,16 @@ int main(){
 		save_data(data[1],data[2],1,data_location,buff,buff_size);
 		
 		// Sounding experiment
-		usleep(300000);
-		
+		RF1_init();
+		sounding_sweep(3,buff,buff_size,data_location,data);	
+		sounding_ant_flip();
+		sounding_sweep(4,buff,buff_size,data_location,data);	
+		sounding_ant_org();
+		sounding_sweep(5,buff,buff_size,data_location,data);	
+		sounding_ant_flip();
+		sounding_sweep(6,buff,buff_size,data_location,data);	
+		sounding_ant_org();
+	
 		// Its possible to run an additional sweep
 		RF2_init();
 		lp_sweep();
@@ -111,7 +119,11 @@ int main(){
 
 		// LP sweep : exp 3
 		RF1_init();
-		usleep(150000);
+		//usleep(150000);
+		sounding_sweep(7,buff,buff_size,data_location,data);	
+		sounding_ant_flip();
+		sounding_sweep(8,buff,buff_size,data_location,data);	
+		sounding_ant_org();
 	
 		// exp counter
 		data[2]++;
