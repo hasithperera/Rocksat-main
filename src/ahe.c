@@ -227,10 +227,10 @@ int RF2_init(){
 
 void get_sounding(){
 // get the full memory bank 2^14 
-
 	
 	rp_AcqStart();
 	rp_AcqSetTriggerSrc(RP_TRIG_SRC_NOW);
+	rand_off();
 	usleep(4);	
 	bool fillState = false;
 	while(!fillState){
@@ -243,14 +243,12 @@ void get_sounding(){
 
 void sounding_sweep(int exp_id,float *buff,uint32_t buff_size,char *file,int *data){
 	int count = 1;
-	for(int i=0;i<5;i++){
-		get_sounding();
-		rp_AcqGetOldestDataV(RP_CH_1, &buff_size, buff);
-		save_data(data[1],data[2]+(count++)*1000,exp_id,file,buff,buff_size); // sounding data
-		printf("file:%d\n",data[2]+(count)*1000);
-	}
-	rand_TX();
-	for(int i=0;i<5;i++){
+	for(int i=0;i<10;i++){
+		
+		if(i%2==0){
+			rand_TX();
+			usleep(1000);
+		}
 		get_sounding();
 		rp_AcqGetOldestDataV(RP_CH_1, &buff_size, buff);
 		save_data(data[1],data[2]+(count++)*1000,exp_id,file,buff,buff_size); // sounding data
