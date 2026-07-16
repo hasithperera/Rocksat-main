@@ -15,6 +15,24 @@ RockSat-main is an FPGA/embedded linux based system that is run on a [Redpitaya-
 - Wrote testing scripts in python to test the payload operation and deployable during testing
 - Developed final flight software 
 
+```mermaid
+flowchart LR
+Ant[Antenna Driver X 3]
+TLM[Time events]
+Rp[Redpitaya/Linux]
+Rp <-->|DMA| FPGA
+W[Waves Instrument, dipole]
+LP[Langmiur Probe]
+FPGA <-- ADC2,DAC2 
+ --> W
+FPGA <-- ADC1,DAC1 
+ --> LP
+
+TLM-->|GPIO| FPGA
+
+FPGA -->|GPIO| Ant
+
+```
 
 ## Demo/Testing 
 
