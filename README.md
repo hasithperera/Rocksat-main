@@ -47,4 +47,10 @@ Figure shows the Lp sweep generated to drive the probe
 
 Figure shows measured RF pulses in the waterfall measured from an external SDR
 
+### Abstracts
+
+Conner, D., Bowman, J., Lusk, G., Perera, H., Goodrich, K., Fowler, C.M., Bonnell, J.W. and Ghalsasi, N., 2025, December. WVU RockSat-X; Lab Plasma Calibrated Ionospheric Density Profile from In-Situ Sounding Rocket. In AGU Fall Meeting Abstracts (Vol. 2025, No. 2356, pp. SA31E-2356).
+
+Conner, D., Bowman, J., Lusk, G., Perera, H., Ghalsasi, N., Goodrich, K., Fowler, C.M. and Bonnell, J.W., 2024, December. WVU RockSat-X; Ionospheric Density Profile Analysis from In-Situ Sounding Rocket. In AGU Fall Meeting Abstracts (Vol. 2024, No. 2448, pp. SA31C-2448).
+
 
