@@ -1,39 +1,32 @@
-# Rocksat-main
 
-The final code will run the WVU RocksatX experiment. 
+# RockSat-main
 
-## configuration 
+Redpitaya based data acquisition and storage system developed for the Rocksat-X (2024) payload for the West Virginia University team.
 
-- The Makefile needs to be changed to show the correct hw platfrom. Set Model(line 1) accordingly
-- `./bin/test_Z10_64.bin` is the final FPGA image 
+RockSat-main is an FPGA/embedded linux based system that is run on a [Redpitaya-STEMlab](https://redpitaya.com/stemlab-125-14/) supporting main antenna deployment, Langmuir probe and the waves experiments. This project is implemented using Xilinx, C and Python. This project contains all the tools developed to test during pre flight and vibration testing as well as flight ready software for the final flight.
 
-## Testing
+## My contributions
 
-- `./scripts/test_1.sh` runs a test sequence to ensure the PWM and experiment restart functionality is operational
-- `./scripts/pre_launch.sh` clears the state history to make it ready for launch
+- Designed a custom FPGA image to fulfill the mission requirements
+	- Antenna deployment
+	- Langmuir probe experiment (DAC and ADC)
+	- Waves - experimental RF payload to generate broadband RF noise during flight 0-30 MHz and save spectra for post processing after flight
+- Performed software verification and testing
+- Wrote testing scripts in python to test the payload operation and deployable during testing
+- Developed final flight software 
 
-## Output file format
 
-The file name created during the experiment will have the following syntax `xxxxx_y_zzzzz.bin`.
-- `xxxxx` specifies the run id. This is increased automatically on a code restart
-- `y`indicates the experiment id.
-- `zzzzz` specifies the time block
+## Demo/Testing 
 
-The files will contain a total of $(2 + bufferlength) \times 4$ bytes of binary data. the first 16 bytes contain a time stamp followed by data expored by the user.
-You can use the following python code block to access the raw data
+### Langmuir probe sweeps 
 
-``` python
-file_i = 'data/00018_1_{:05}.bin'.format(0)
-time_stamp = np.fromfile(file_i, dtype=np.intc, count=2, offset = 0)
-data = np.fromfile(file_i, dtype=np.float32, count=-1, offset = 8)
-```
-## To-Do list
+![](docs/bin/Pasted%20image%2020260715201335.png)
 
-- [x] IO control
-- [x] LP SPI DAC
-- [x] LP SPI ADC: Using RF2 input
-- [x] File saving
-- [x] Sounding random numbers: Via RF1 output
-- [x] PWM control
+Figure shows the Lp sweep generated to drive the probe 
+### 0-30 MHz RF generation
+
+![](docs/bin/Pasted%20image%2020260715201440.png)
+
+Figure shows measured RF pulses in the waterfall measured from an external SDR
 
 
